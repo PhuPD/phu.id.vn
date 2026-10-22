@@ -224,7 +224,7 @@
     var now = new Date();
     document.getElementById('years').textContent = (now.getFullYear() - 2014 - (now.getMonth() < 9 ? 1 : 0)) + '+';
     // Ghép email lúc chạy để bot quét thư rác không đọc được từ HTML
-    var m = ['phamngocphu49', 'gmail.com'].join('@');
+    var m = ['admin', 'phu.id.vn'].join('@');
     document.getElementById('mail').href = 'mailto:' + m;
     document.getElementById('mail-card').href = 'mailto:' + m;
     document.getElementById('mail-text').textContent = m;
