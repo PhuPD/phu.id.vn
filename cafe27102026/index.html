@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Cafe Startup AI Agent</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: một cột đọc trên điện thoại, thanh mục lục dính trên cùng, mỗi phần là một khối có nhãn màu */
+:root{
+  --bg:#F7F9FC; --paper:#FFFFFF; --ink:#1A2233; --muted:#5B6578; --line:#E3E8F0;
+  --accent:#FF5A36; --accent-soft:#FFEDE8;
+  --blue:#1D6FE8; --blue-soft:#E8F1FF;
+  --good:#11A36B; --good-soft:#E3F7EE;
+  --warn:#E89B00; --warn-soft:#FFF4D9;
+  --bad:#E5383B; --bad-soft:#FFE8E8;
+  --font:"Be Vietnam Pro",-apple-system,"SF Pro Text","Helvetica Neue",Arial,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.55;-webkit-text-size-adjust:100%}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--paper)}
+.wrap{max-width:720px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{background:var(--paper);border-bottom:1px solid var(--line)}
+header .wrap{padding-block:22px 18px;display:grid;gap:10px}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+h1{font-size:26px;line-height:1.2;margin:0;font-weight:800;text-wrap:balance}
+.lead{margin:0;color:var(--muted);font-size:15px}
+.verdict{background:var(--accent-soft);border-radius:14px;padding:14px 16px;font-weight:600;font-size:15.5px}
+.verdict b{color:var(--accent)}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;gap:8px;overflow-x:auto;padding-block:10px;scrollbar-width:none}
+nav .wrap::-webkit-scrollbar{display:none}
+nav a{flex:0 0 auto;text-decoration:none;color:var(--ink);font-size:14px;font-weight:600;padding:7px 13px;border-radius:999px;background:var(--bg);border:1px solid var(--line)}
+nav a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+main .wrap{padding-block:18px 40px;display:grid;gap:22px}
+section{scroll-margin-top:calc(64px + env(safe-area-inset-top,0px));display:grid;gap:12px}
+h2{font-size:20px;margin:0;font-weight:800;display:flex;align-items:center;gap:10px}
+h2 .tag{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:6px}
+h3{font-size:16px;margin:0;font-weight:700}
+p{margin:0}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:grid;gap:8px;min-width:0}
+ul{margin:0;padding-left:20px;display:grid;gap:6px}
+.muted{color:var(--muted);font-size:14px}
+.num{font-variant-numeric:tabular-nums;font-weight:700}
+/* bảng công ty */
+.cos{display:grid;gap:10px}
+.co{display:grid;grid-template-columns:1fr auto;gap:2px 12px;align-items:baseline}
+.co + .co{border-top:1px solid var(--line);padding-top:10px}
+.co .name{font-weight:700}
+.co .val{font-variant-numeric:tabular-nums;font-weight:800;color:var(--good);text-align:right}
+.co .what{grid-column:1 / -1;color:var(--muted);font-size:14px}
+.dead .val{color:var(--bad)}
+/* kịch bản */
+details.sc{background:var(--paper);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+details.sc summary{list-style:none;cursor:pointer;padding:14px 16px;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center}
+details.sc summary::-webkit-details-marker{display:none}
+.letter{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;font-weight:800;color:#fff}
+.sc-title{font-weight:700;line-height:1.3}
+.pill{font-size:12px;font-weight:700;padding:4px 9px;border-radius:999px;white-space:nowrap}
+.p-bad{background:var(--bad-soft);color:var(--bad)}
+.p-warn{background:var(--warn-soft);color:#9A6500}
+.p-good{background:var(--good-soft);color:var(--good)}
+.p-blue{background:var(--blue-soft);color:var(--blue)}
+.sc-body{padding:0 16px 16px;display:grid;gap:10px}
+.say{background:var(--blue-soft);border-radius:10px;padding:10px 12px;font-size:15px}
+.say::before{content:"Anh nói: ";font-weight:700;color:var(--blue)}
+.hint{background:var(--good-soft);border-radius:12px;padding:12px 14px;font-size:15px}
+/* red flag */
+.flags{display:grid;gap:10px}
+.flag{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start}
+.flag .n{width:28px;height:28px;border-radius:50%;background:var(--warn-soft);color:#9A6500;font-weight:800;display:grid;place-items:center;font-size:14px}
+/* câu hỏi tick */
+.qgroup{display:grid;gap:4px}
+.qgroup h3{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+.q{display:grid;grid-template-columns:24px 1fr;gap:10px;align-items:start;padding:8px 0;cursor:pointer}
+.q input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--good)}
+.q input:checked + span{color:var(--muted);text-decoration:line-through}
+.qcount{font-size:14px;color:var(--muted)}
+/* chấm điểm */
+.crit{display:grid;gap:6px;padding:10px 0}
+.crit + .crit{border-top:1px solid var(--line)}
+.crit-name{font-weight:700}
+.opts{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.opts button{font:inherit;font-size:13px;line-height:1.3;padding:8px 6px;border-radius:10px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer;text-align:center;min-height:52px}
+.opts button b{display:block;font-size:16px}
+.opts button[aria-pressed="true"][data-v="0"]{border-color:var(--bad);background:var(--bad-soft)}
+.opts button[aria-pressed="true"][data-v="1"]{border-color:var(--warn);background:var(--warn-soft)}
+.opts button[aria-pressed="true"][data-v="2"]{border-color:var(--good);background:var(--good-soft)}
+.total{position:sticky;bottom:calc(10px + env(safe-area-inset-bottom,0px));background:var(--ink);color:#fff;border-radius:14px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.total .score{font-size:24px;font-weight:800;font-variant-numeric:tabular-nums}
+.total .vtxt{font-weight:600;font-size:14px}
+.reset{font:inherit;font-size:13px;background:transparent;color:#fff;border:1px solid rgba(255,255,255,.4);border-radius:8px;padding:5px 10px;cursor:pointer}
+.quote{background:var(--accent);color:#fff;border-radius:14px;padding:16px;font-weight:600;font-size:16.5px;line-height:1.5}
+.src a{color:var(--blue);word-break:break-word}
+.src summary{cursor:pointer;font-weight:700}
+footer{color:var(--muted);font-size:13px}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="eyebrow">Cafe chiều 27/10 · startup AI Agent</div>
+    <h1>Startup AI Agent của chị: cần soi gì trước khi tham gia</h1>
+    <p class="lead">Ghi chú chuẩn bị. Đọc 3 phút, đem theo để hỏi và chấm điểm ngay tại bàn.</p>
+    <div class="verdict">Mảng này có tiền thật, nhưng chỉ cho bên <b>chọn hẹp</b>. Câu cần hỏi ra được: <b>ai trả tiền, cho việc gì, đo bằng số nào.</b></div>
+  </div>
+</header>
+
+<nav aria-label="Mục lục">
+  <div class="wrap">
+    <a href="#the-gioi">Thế giới</a>
+    <a href="#viet-nam">Việt Nam</a>
+    <a href="#tin-hieu">Tín hiệu</a>
+    <a href="#kich-ban">Kịch bản</a>
+    <a href="#cau-hoi">Câu hỏi</a>
+    <a href="#cham-diem">Chấm điểm</a>
+    <a href="#vai-tro">Vai trò anh</a>
+  </div>
+</nav>
+
+<main>
+<div class="wrap">
+
+<section id="the-gioi">
+  <h2>Thế giới <span class="tag p-good">ai thắng</span></h2>
+  <div class="card cos">
+    <div class="co"><span class="name">Sierra</span><span class="val">~$200M ARR</span><span class="what">Agent CSKH cho doanh nghiệp lớn. Định giá $15.8B (05/2026).</span></div>
+    <div class="co"><span class="name">Glean</span><span class="val">&gt;$300M ARR</span><span class="what">Tìm kiếm và agent trên dữ liệu nội bộ. Từ 200 lên 300 trong 6 tháng.</span></div>
+    <div class="co"><span class="name">Decagon</span><span class="val">~$100M</span><span class="what">Agent CSKH. Doanh thu năm hoá 08/2026, số thứ cấp.</span></div>
+    <div class="co"><span class="name">Lindy, Relevance AI</span><span class="val">$20–50/th</span><span class="what">Tự dựng agent không code cho SMB. Giá rẻ, cạnh tranh khốc liệt.</span></div>
+  </div>
+  <div class="hint"><b>Công thức chung của bên thắng:</b> một use case (chủ yếu CSKH), tích hợp sâu vào hệ thống khách, tính tiền theo kết quả (ticket giải quyết được), không bán "nền tảng AI".</div>
+
+  <h2>Thế giới <span class="tag p-bad">ai chết</span></h2>
+  <div class="card cos dead">
+    <div class="co"><span class="name">Humane AI Pin</span><span class="val">$240M → $116M</span><span class="what">AI cá nhân. Gọi vốn $240M, bán phần còn lại cho HP và khai tử. Không có lý do dùng mỗi ngày.</span></div>
+    <div class="co"><span class="name">Gartner</span><span class="val">&gt;40%</span><span class="what">Dự án agentic AI dự báo bị huỷ trước 2027, chủ yếu vì không chứng minh được ROI.</span></div>
+    <div class="co"><span class="name">MIT NANDA 2025</span><span class="val">95%</span><span class="what">Pilot GenAI không tạo tác động đo được sau 6 tháng. Phương pháp bị chê, coi là tín hiệu.</span></div>
+  </div>
+  <div class="card"><p><b>Đe doạ lớn nhất:</b> OpenAI, Anthropic (Cowork), Google (Gemini Enterprise) đã gói agent vào thuê bao sẵn có. "Trợ lý AI chung chung" bị ép cả hai đầu.</p></div>
+</section>
+
+<section id="viet-nam">
+  <h2>Việt Nam <span class="tag p-blue">chưa ai thắng hẳn</span></h2>
+  <div class="card">
+    <ul>
+      <li><b>MISA AMIS + AVA:</b> đối thủ đáng sợ nhất mảng SME. Có sẵn tệp khách kế toán/HRM, cho doanh nghiệp tự tạo agent. Tự công bố CSKH chỉ cần 350 người thay vì 600.</li>
+      <li><b>FPT AI, Viettel AI, Zalo AI, VinAI:</b> mạnh tổng đài, chatbot, OCR, eKYC; bán cho doanh nghiệp lớn.</li>
+      <li><b>Thị trường:</b> ~<span class="num">170.000</span> doanh nghiệp dùng AI (2025), nhưng <span class="num">74%</span> chỉ tối ưu cơ bản, <span class="num">9%</span> coi là cốt lõi. Có nhu cầu, khả năng chi trả còn thấp.</li>
+    </ul>
+  </div>
+  <div class="hint"><b>Khoảng trống còn mở:</b> agent chạy trên Zalo OA, Facebook, Pancake, KiotViet, MISA, đúng quy trình bán hàng kiểu Việt: telesale, chốt đơn inbox, CSKH sau bán. Big Tech nước ngoài không làm sâu phần này.</div>
+</section>
+
+<section id="tin-hieu">
+  <h2>Đọc tin nhắn của chị <span class="tag p-warn">4 tín hiệu</span></h2>
+  <div class="card flags">
+    <div class="flag"><span class="n">1</span><p><b>"Doanh nghiệp VÀ cá nhân":</b> B2B bán trực tiếp và B2C app là hai mô hình khác hẳn. Startup nhỏ làm cả hai gần như chắc chắn dàn mỏng.</p></div>
+    <div class="flag"><span class="n">2</span><p><b>8 tháng, tháng 11 mới có beta tester:</b> build trước, hỏi thị trường sau. Lỗi phổ biến nhất.</p></div>
+    <div class="flag"><span class="n">3</span><p><b>"Mời ae kỹ sư FPT về xây":</b> co-founder có cổ phần, full-time, hay thuê ngoài/part-time? Quyết định tốc độ sửa sản phẩm sau beta.</p></div>
+    <div class="flag"><span class="n">4</span><p><b>Nền BA, chưa có kênh phân phối:</b> lỗ hổng lớn nhất là go-to-market. Đó là lý do chị tìm tới anh.</p></div>
+  </div>
+</section>
+
+<section id="kich-ban">
+  <h2>5 kịch bản sản phẩm</h2>
+  <p class="muted">Bấm từng dòng để mở. Khả năng cao họ đang ở A + B.</p>
+
+  <details class="sc">
+    <summary><span class="letter" style="background:var(--bad)">A</span><span class="sc-title">App chat AI đa năng tiếng Việt</span><span class="pill p-bad">Rất yếu</span></summary>
+    <div class="sc-body"><p>Bọc GPT/Claude/Gemini. Không có hào phòng thủ, ChatGPT miễn phí đã làm tốt hơn.</p><p class="say">Người dùng có lý do gì bỏ ChatGPT/Gemini để dùng app này? "Tiếng Việt tốt hơn" thì chưa đủ.</p></div>
+  </details>
+  <details class="sc">
+    <summary><span class="letter" style="background:var(--warn)">B</span><span class="sc-title">Nền tảng tự dựng agent cho doanh nghiệp</span><span class="pill p-warn">Khó</span></summary>
+    <div class="sc-body"><p>Kiểu Lindy/n8n bản Việt. Đụng MISA, n8n, Zapier, Big Tech. SME Việt không tự cấu hình được.</p><p class="say">SME Việt không muốn dựng agent, họ muốn thuê một nhân viên đã biết việc. Bán kết quả, đừng bán công cụ.</p></div>
+  </details>
+  <details class="sc" open>
+    <summary><span class="letter" style="background:var(--good)">C</span><span class="sc-title">Agent ngành dọc: CSKH, chốt đơn Zalo/FB, telesale, đặt bàn, nhắc công nợ</span><span class="pill p-good">Tiềm năng nhất</span></summary>
+    <div class="sc-body"><p>Nỗi đau rõ, đo được ROI, đúng công thức Sierra/Decagon.</p><p class="say">Chọn 1 ngành, 1 việc, làm cho 10 khách trả tiền thật. Sau đó mới tính nhân rộng.</p></div>
+  </details>
+  <details class="sc">
+    <summary><span class="letter" style="background:var(--warn)">D</span><span class="sc-title">Trợ lý AI cá nhân: lịch, nhắc việc, email, chi tiêu</span><span class="pill p-warn">Khó thu tiền</span></summary>
+    <div class="sc-body"><p>Người Việt khó trả tiền cho B2C. Big Tech đang làm sẵn ngay trong điện thoại.</p><p class="say">Tần suất dùng mỗi ngày là gì? Người Việt có trả 99k/tháng cho cái này không, có số nào chứng minh chưa?</p></div>
+  </details>
+  <details class="sc">
+    <summary><span class="letter" style="background:var(--blue)">E</span><span class="sc-title">Dịch vụ triển khai agent theo yêu cầu</span><span class="pill p-blue">Dòng tiền</span></summary>
+    <div class="sc-body"><p>Có tiền ngay, biên ổn, nhưng khó định giá kiểu startup.</p><p class="say">Cách tốt để có dòng tiền và học thị trường. Đóng gói dần các dự án lặp lại thành sản phẩm C.</p></div>
+  </details>
+  <div class="hint"><b>Góp ý giá trị nhất nếu họ đang ở A + B:</b> thu hẹp về C, dùng E làm nguồn tiền.</div>
+</section>
+
+<section id="cau-hoi">
+  <h2>Câu hỏi đem theo <span class="qcount" id="qcount"></span></h2>
+  <p class="muted">Hỏi theo thứ tự. Tick lại khi đã có câu trả lời.</p>
+  <div class="card" id="qlist">
+    <div class="qgroup"><h3>Khách hàng và nỗi đau</h3>
+      <label class="q"><input type="checkbox" id="q1"><span>Khách mục tiêu chính xác là ai: ngành, quy mô, ai ra quyết định mua?</span></label>
+      <label class="q"><input type="checkbox" id="q2"><span>Đã nói chuyện với bao nhiêu khách trước khi build? Có ai cam kết trả tiền hay ký thư ý định (LOI) chưa?</span></label>
+      <label class="q"><input type="checkbox" id="q3"><span>Agent thay việc gì, mỗi tháng tiết kiệm bao nhiêu giờ hoặc bao nhiêu tiền?</span></label>
+    </div>
+    <div class="qgroup"><h3>Sản phẩm và công nghệ</h3>
+      <label class="q"><input type="checkbox" id="q4"><span>Demo một tác vụ chạy từ đầu đến cuối. Agent <b>làm</b> được việc, hay chỉ <b>trả lời</b>?</span></label>
+      <label class="q"><input type="checkbox" id="q5"><span>Tích hợp được gì: Zalo OA, Facebook, Google Workspace, MISA, Pancake, KiotViet?</span></label>
+      <label class="q"><input type="checkbox" id="q6"><span>Dùng model nào? Chi phí token mỗi người dùng mỗi tháng so với giá định bán?</span></label>
+      <label class="q"><input type="checkbox" id="q7"><span>Cái gì đối thủ không copy được trong 3 tháng: dữ liệu, quy trình ngành, tích hợp, kênh?</span></label>
+    </div>
+    <div class="qgroup"><h3>Kinh doanh</h3>
+      <label class="q"><input type="checkbox" id="q8"><span>Giá dự kiến: theo ghế, theo tác vụ hay theo kết quả?</span></label>
+      <label class="q"><input type="checkbox" id="q9"><span>Beta tháng 11 coi là thành công khi nào? Gợi ý: ≥30% còn dùng sau 4 tuần, ≥3 khách trả tiền.</span></label>
+      <label class="q"><input type="checkbox" id="q10"><span>Kênh có khách: bán trực tiếp, đối tác hay cộng đồng?</span></label>
+    </div>
+    <div class="qgroup"><h3>Đội ngũ và tiền</h3>
+      <label class="q"><input type="checkbox" id="q11"><span>Kỹ sư FPT là co-founder hay thuê ngoài? Có cổ phần không, full-time hay part-time?</span></label>
+      <label class="q"><input type="checkbox" id="q12"><span>Còn đủ tiền chạy bao nhiêu tháng? Có định gọi vốn không?</span></label>
+      <label class="q"><input type="checkbox" id="q13"><span>Chị muốn anh tham gia vai trò gì: tư vấn, co-founder, hay khách hàng thử nghiệm?</span></label>
+    </div>
+  </div>
+</section>
+
+<section id="cham-diem">
+  <h2>Chấm điểm sau buổi gặp</h2>
+  <p class="muted">Bấm một mức cho mỗi tiêu chí, điểm tự cộng.</p>
+  <div class="card" id="score"></div>
+  <div class="total" aria-live="polite">
+    <div><div class="score"><span id="tot">0</span>/12</div><div class="vtxt" id="vtxt">Chưa chấm tiêu chí nào</div></div>
+    <button class="reset" type="button" id="reset">Chấm lại</button>
+  </div>
+</section>
+
+<section id="vai-tro">
+  <h2>Vai trò của anh</h2>
+  <div class="card">
+    <ul>
+      <li><b>Lợi thế anh mang tới:</b> go-to-market, marketing, cộng đồng F&amp;B, hiểu nỗi đau vận hành thật (CSKH, telesale, đặt bàn). Đúng thứ founder BA thường thiếu.</li>
+      <li><b>Cách an toàn nhất:</b> cố vấn có điều kiện, khoảng 0,5–2% cổ phần, vesting 2 năm, cliff 6 tháng, 2–4 giờ/tuần. Đây là thông lệ, không phải số tra được. Chưa góp tiền, chưa điều hành trước khi có số beta.</li>
+      <li><b>Đòn bẩy:</b> đề nghị Trà Bồ Khai làm khách thử nghiệm (agent chăm khách hoặc hỗ trợ telesale). Giải được việc thật của anh là bằng chứng tốt nhất cho cả hai bên.</li>
+      <li><b>Cẩn thận với Aladdin:</b> công ty anh đang làm thuê, có rủi ro xung đột lợi ích và dữ liệu khách hàng. Đừng tự hứa gì.</li>
+    </ul>
+  </div>
+  <div class="quote">"Beta tháng 11 đừng đo số lượt tải app. Đo xem có 10 khách nào dùng lại hằng tuần và sẵn sàng trả tiền không. Có con số đó thì em tham gia nghiêm túc."</div>
+</section>
+
+<section class="src">
+  <details class="card">
+    <summary>Nguồn số liệu</summary>
+    <ul class="muted">
+      <li><a href="https://sacra.com/c/sierra/">Sacra: Sierra</a> · <a href="https://sacra.com/research/sierra-vs-decagon/">Sierra vs Decagon</a> · <a href="https://enterprisedna.co/resources/ai-map/company/decagon">Enterprise DNA: Decagon</a></li>
+      <li><a href="https://mezha.net/eng/news/ff38cf67_ai_startups_accelerate/">AI startups ARR milestones (Glean)</a></li>
+      <li><a href="https://pasqualepillitteri.it/en/news/19689/why-ai-agent-projects-fail-enterprise">Why AI agent projects fail (Gartner)</a> · <a href="https://www.vccafe.com/why-95-of-ai-pilots-fail/">VC Cafe: 95% pilots fail</a></li>
+      <li><a href="https://businessinsider.nl/humane-is-shutting-down-service-for-a-beleaguered-ai-pin-after-sale-to-hp-some-buyers-wont-get-a-refund">Business Insider: Humane</a></li>
+      <li><a href="https://ai.zenken.co.jp/en/post/ai-agent-landscape-2026/">AI Agent Landscape 2026</a> · <a href="https://www.eesel.ai/blog/lindy-vs-relevance-ai">Lindy vs Relevance AI</a></li>
+      <li><a href="https://viblo.asia/p/toan-canh-cong-ty-ai-viet-nam-nam-2026-ai-dang-lam-gi-va-doanh-nghiep-nen-chon-huong-nao-1XVOWYPNVMz">Viblo: công ty AI Việt Nam 2026</a> · <a href="https://vnreview.vn/threads/tp-hcm-dat-muc-tieu-tang-truong-kep-trong-ky-nguyen-so-tu-ai-ho-tro-den-tac-nhan-ai-tai-scaling-business-summit-2026.79198/latest">VnReview: số doanh nghiệp dùng AI</a></li>
+      <li><a href="https://sme.misa.vn/272195/tap-doan-misa-tap-doan-tien-phong-xay-dung-agentic-ai-cho-doanh-nghiep-ho-kinh-doanh-va-chinh-phu/">MISA: Agentic AI</a> · <a href="https://doanhnhan.baophapluat.vn/misa-ung-dung-ai-nang-cao-hieu-suat-lam-viec-cho-doanh-nghiep-78243.html">Báo Pháp Luật: MISA</a></li>
+    </ul>
+    <p class="muted">Số ARR của Sierra/Decagon một phần là ước tính của Sacra. Số MISA, FPT do công ty tự công bố.</p>
+  </details>
+</section>
+
+<footer>Soạn ngày 26/10/2026 cho buổi cafe 27/10.</footer>
+</div>
+</main>
+
+<script>
+(function(){
+  var store={get:function(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+  // Câu hỏi tick
+  var boxes=[].slice.call(document.querySelectorAll('#qlist input'));
+  var qs=store.get('cafe-q')||{};
+  function qc(){var n=boxes.filter(function(b){return b.checked}).length;document.getElementById('qcount').textContent=n+'/'+boxes.length;}
+  boxes.forEach(function(b){b.checked=!!qs[b.id];b.addEventListener('change',function(){qs[b.id]=b.checked;store.set('cafe-q',qs);qc();});});
+  qc();
+
+  // Chấm điểm
+  var crits=[
+    ['Tập trung','Mọi DN, mọi người','2–3 mảng','1 ngành, 1 việc'],
+    ['Bằng chứng nhu cầu','Chưa có ai','Có người dùng thử','Có khách cam kết trả tiền/LOI'],
+    ['Khác biệt','Bọc model có sẵn','Tiếng Việt, UX tốt','Tích hợp/dữ liệu đặc thù VN'],
+    ['Kinh tế đơn vị','Chưa tính','Tính sơ bộ','Biết chi phí token và biên'],
+    ['Đội ngũ','Thuê ngoài, part-time','Lẫn lộn','Co-founder kỹ thuật full-time'],
+    ['Kênh phân phối','Chưa có','Có ý tưởng','Có kênh rõ ràng']
+  ];
+  var sc=store.get('cafe-score')||{};
+  var box=document.getElementById('score');
+  crits.forEach(function(c,i){
+    var d=document.createElement('div');d.className='crit';
+    var h='<div class="crit-name">'+c[0]+'</div><div class="opts">';
+    for(var v=0;v<3;v++){h+='<button type="button" data-i="'+i+'" data-v="'+v+'" aria-pressed="false"><b>'+v+'</b>'+c[v+1]+'</button>';}
+    d.innerHTML=h+'</div>';box.appendChild(d);
+  });
+  function render(){
+    var t=0,n=0;
+    [].forEach.call(box.querySelectorAll('button'),function(b){var on=sc[b.dataset.i]===+b.dataset.v;b.setAttribute('aria-pressed',on?'true':'false');});
+    Object.keys(sc).forEach(function(k){t+=sc[k];n++;});
+    document.getElementById('tot').textContent=t;
+    var v;
+    if(n===0)v='Chưa chấm tiêu chí nào';
+    else if(n<crits.length)v='Đã chấm '+n+'/'+crits.length+' tiêu chí';
+    else if(t>=9)v='Đáng cân nhắc tham gia';
+    else if(t>=5)v='Chỉ nên làm tư vấn';
+    else v='Góp ý thật lòng rồi dừng';
+    document.getElementById('vtxt').textContent=v;
+  }
+  box.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;var i=b.dataset.i,v=+b.dataset.v;if(sc[i]===v)delete sc[i];else sc[i]=v;store.set('cafe-score',sc);render();});
+  document.getElementById('reset').addEventListener('click',function(){sc={};store.set('cafe-score',sc);render();});
+  render();
+})();
+</script>
+</body>
+</html>
